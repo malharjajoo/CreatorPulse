@@ -40,8 +40,8 @@ router.post('/signup', async (req, res) => {
       return res.status(400).json({ error: 'Failed to create user' });
     }
 
-    // Create user profile
-    const { error: profileError } = await supabase
+    // Create user profile using admin client to bypass RLS
+    const { error: profileError } = await supabaseAdmin
       .from('users')
       .insert({
         id: authData.user.id,
@@ -134,8 +134,8 @@ router.get('/me', async (req, res) => {
       return res.status(401).json({ error: 'Invalid token' });
     }
 
-    // Get user profile
-    const { data: profile, error: profileError } = await supabase
+    // Get user profile using admin client to bypass RLS
+    const { data: profile, error: profileError } = await supabaseAdmin
       .from('users')
       .select('*')
       .eq('id', user.id)

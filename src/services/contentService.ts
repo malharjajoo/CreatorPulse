@@ -1,73 +1,52 @@
 import axios from 'axios';
 import Parser from 'rss-parser';
-import { TwitterApi } from 'twitter-api-v2';
 import { config } from '../config/env';
 import { supabase } from '../database/supabase';
 import { ContentItem } from './aiService';
 
 const rssParser = new Parser();
-const twitterClient = new TwitterApi(config.twitter.bearerToken);
 
 export const fetchTwitterContent = async (handle: string): Promise<ContentItem[]> => {
   try {
-    // Get user by username
-    const user = await twitterClient.v2.userByUsername(handle);
+    // Use Twitter RSS feed (nitter or similar service)
+    // Note: Twitter doesn't provide official RSS, so we'll use a third-party service
+    const rssUrl = `https://nitter.net/${handle}/rss`;
     
-    if (!user.data) {
-      throw new Error(`Twitter user @${handle} not found`);
-    }
-
-    // Get user's recent tweets
-    const tweets = await twitterClient.v2.userTimeline(user.data.id, {
-      max_results: 20,
-      'tweet.fields': ['created_at', 'public_metrics', 'text']
-    });
-
-    return tweets.data.data?.map(tweet => ({
-      id: tweet.id,
+    const feed = await rssParser.parseURL(rssUrl);
+    
+    return feed.items?.slice(0, 20).map(item => ({
+      id: item.guid || item.link || '',
       source_id: '', // Will be set when saving to database
-      title: `Tweet by @${handle}`,
-      content: tweet.text,
-      url: `https://twitter.com/${handle}/status/${tweet.id}`,
-      published_at: tweet.created_at!,
-      engagement_metrics: {
-        likes: tweet.public_metrics?.like_count || 0,
-        retweets: tweet.public_metrics?.retweet_count || 0,
-        replies: tweet.public_metrics?.reply_count || 0
-      }
+      title: item.title || `Tweet by @${handle}`,
+      content: item.contentSnippet || item.content || '',
+      url: item.link || '',
+      published_at: item.pubDate || new Date().toISOString(),
+      engagement_metrics: {}
     })) || [];
   } catch (error) {
-    console.error(`Error fetching Twitter content for @${handle}:`, error);
+    console.error(`Error fetching Twitter RSS for @${handle}:`, error);
     return [];
   }
 };
 
 export const fetchYouTubeContent = async (channelId: string): Promise<ContentItem[]> => {
   try {
-    const response = await axios.get('https://www.googleapis.com/youtube/v3/search', {
-      params: {
-        part: 'snippet',
-        channelId: channelId,
-        maxResults: 10,
-        order: 'date',
-        type: 'video',
-        key: config.youtube.apiKey
-      }
-    });
-
-    return response.data.items?.map((item: any) => ({
-      id: item.id.videoId,
+    // Use YouTube RSS feed
+    const rssUrl = `https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`;
+    
+    const feed = await rssParser.parseURL(rssUrl);
+    
+    return feed.items?.slice(0, 10).map(item => ({
+      id: item.guid || item.link || '',
       source_id: '', // Will be set when saving to database
-      title: item.snippet.title,
-      content: item.snippet.description,
-      url: `https://www.youtube.com/watch?v=${item.id.videoId}`,
-      published_at: item.snippet.publishedAt,
-      engagement_metrics: {
-        views: 0 // YouTube API doesn't provide view count in search results
-      }
+      title: item.title || '',
+      content: item.contentSnippet || item.content || '',
+      url: item.link || '',
+      published_at: item.pubDate || new Date().toISOString(),
+      engagement_metrics: {}
     })) || [];
   } catch (error) {
-    console.error(`Error fetching YouTube content for channel ${channelId}:`, error);
+    console.error(`Error fetching YouTube RSS for channel ${channelId}:`, error);
     return [];
   }
 };

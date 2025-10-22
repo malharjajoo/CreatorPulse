@@ -15,12 +15,7 @@ export const config = {
   resend: {
     apiKey: process.env.RESEND_API_KEY!
   },
-  twitter: {
-    bearerToken: process.env.TWITTER_BEARER_TOKEN!
-  },
-  youtube: {
-    apiKey: process.env.YOUTUBE_API_KEY!
-  },
+  // Twitter and YouTube now use RSS feeds - no API keys needed
   jwt: {
     secret: process.env.JWT_SECRET || 'your-secret-key'
   }

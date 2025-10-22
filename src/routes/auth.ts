@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { supabase } from '../database/supabase';
+import { supabase, supabaseAdmin } from '../database/supabase';
 import Joi from 'joi';
 
 const router = Router();
@@ -61,7 +61,8 @@ router.post('/signup', async (req, res) => {
         id: authData.user.id,
         email: authData.user.email,
         name
-      }
+      },
+      session: authData.session
     });
   } catch (error) {
     console.error('Sign up error:', error);

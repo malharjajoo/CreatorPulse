@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { supabase } from '../database/supabase';
+import { supabaseAdmin } from '../database/supabase';
 import { AuthenticatedRequest } from '../middleware/auth';
 import Joi from 'joi';
 
@@ -14,7 +14,7 @@ const sourceSchema = Joi.object({
 // Get all sources for user
 router.get('/', async (req: AuthenticatedRequest, res) => {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('sources')
       .select('*')
       .eq('user_id', req.user!.id)
@@ -38,7 +38,7 @@ router.post('/', async (req: AuthenticatedRequest, res) => {
     }
 
     console.log('Creating source ...');
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('sources')
       .insert({
         user_id: req.user!.id,
@@ -66,7 +66,7 @@ router.put('/:id', async (req: AuthenticatedRequest, res) => {
       return res.status(400).json({ error: validationError.details[0].message });
     }
 
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('sources')
       .update(value)
       .eq('id', req.params.id)
@@ -86,7 +86,7 @@ router.put('/:id', async (req: AuthenticatedRequest, res) => {
 // Delete source
 router.delete('/:id', async (req: AuthenticatedRequest, res) => {
   try {
-    const { error } = await supabase
+    const { error } = await supabaseAdmin
       .from('sources')
       .delete()
       .eq('id', req.params.id)

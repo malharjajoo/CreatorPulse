@@ -79,6 +79,11 @@ class ApiClient {
     return response.data.user;
   }
 
+  async updateProfile(data: { name: string; timezone: string }): Promise<User> {
+    const response = await this.client.put<{ user: User }>('/auth/profile', data);
+    return response.data.user;
+  }
+
   // Sources endpoints
   async getSources(): Promise<Source[]> {
     const response = await this.client.get<{ sources: Source[] }>('/sources');

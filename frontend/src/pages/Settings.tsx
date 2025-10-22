@@ -8,13 +8,9 @@ import {
   Trash2,
   Save,
   Upload,
-  Download,
-  AlertCircle,
-  CheckCircle,
 } from 'lucide-react';
 import { useApi, useMutation } from '../hooks/useApi';
 import { apiClient } from '../services/api';
-import { WritingSample } from '../types';
 import { formatRelativeTime } from '../utils/format';
 import { cn } from '../utils/cn';
 import toast from 'react-hot-toast';
@@ -242,7 +238,7 @@ const Settings: React.FC = () => {
                     </label>
                     <input
                       type="text"
-                      value={user ? formatRelativeTime(user.created_at) : ''}
+                      value={user?.created_at ? formatRelativeTime(user.created_at) : 'Unknown'}
                       disabled
                       className="mt-1 input bg-gray-50"
                     />
@@ -384,7 +380,7 @@ const Settings: React.FC = () => {
                             {sample.content}
                           </p>
                           <p className="mt-1 text-xs text-gray-500">
-                            Added {formatRelativeTime(sample.created_at)}
+                            Added {sample.created_at ? formatRelativeTime(sample.created_at) : 'Unknown'}
                           </p>
                         </div>
                         <button

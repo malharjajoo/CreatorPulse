@@ -37,6 +37,7 @@ router.post('/', async (req: AuthenticatedRequest, res) => {
       return res.status(400).json({ error: validationError.details[0].message });
     }
 
+    console.log('Creating source ...');
     const { data, error } = await supabase
       .from('sources')
       .insert({
@@ -47,6 +48,8 @@ router.post('/', async (req: AuthenticatedRequest, res) => {
       .single();
 
     if (error) throw error;
+    console.log('data:', data);
+    console.log('Source created successfully');
 
     res.status(201).json({ source: data });
   } catch (error) {
